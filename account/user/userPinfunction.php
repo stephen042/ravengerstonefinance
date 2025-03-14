@@ -6,7 +6,6 @@ $email = $row['acct_email'];
 $account_id = $row['id'];
 
 if (isset($_POST['wire_transfer'])) {
-
     $amount = inputValidation($_POST['amount']);
     $acct_name = inputValidation($_POST['acct_name']);
     $bank_name = inputValidation($_POST['bank_name']);
@@ -17,31 +16,36 @@ if (isset($_POST['wire_transfer'])) {
     $acct_type = inputValidation($_POST['acct_type']);
     $acct_remarks = inputValidation($_POST['acct_remarks']);
 
-
-
     $acct_amount = $row['acct_balance'];
-
+    $limit_balance = $row['acct_limit'];
 
     if ($amount <= 0) {
         toast_alert('error', 'Invalid amount entered');
-    } else if ($amount > $acct_amount) {
+    } elseif ($amount > $acct_amount) {
         toast_alert("error", "Insufficient Balance");
     } else {
-        $limit_balance = $row['acct_limit'];
-        $transferLimit = $row['limit_remain'];
+        // Check last three transactions for the user
+        $sql = "SELECT amount FROM wire_transfer WHERE acct_id = :acct_id ORDER BY created_at DESC LIMIT 3";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(['acct_id' => $account_id]);
+        $recentTransfers = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-        if ($transferLimit === 0) {
-            toast_alert('error', 'You have Exceed Your Transfer Limit');
-        }
+        // Count how many of the last 3 transactions were at or above the limit
+        $limitCount = count(array_filter($recentTransfers, function ($value) use ($limit_balance) {
+            return $value >= $limit_balance;
+        }));
 
-        if ($amount > $transferLimit) {
-            toast_alert('error', 'Your transfer limit remain ' . $transferLimit);
+        if ($limitCount >= 3) {
+            toast_alert('error', 'You have exceeded your transfer limit. Increase your limit to proceed.');
+        } elseif ($amount > $limit_balance) {
+            toast_alert('error', 'Your transfer limit is ' . $limit_balance);
         } else {
-
+            // Proceed with transfer logic
             $trans_id = uniqid();
             $trans_opt = substr(number_format(time() * rand(), 0, '', ''), 0, 6);
 
-            $sql = "INSERT INTO temp_trans (amount,trans_id,acct_id,bank_name,acct_name_id,acct_number,acct_type,acct_country,acct_swift,acct_routing,acct_remarks,trans_otp) VALUES(:amount,:trans_id,:acct_id,:bank_name,:acct_name,:acct_number,:acct_type,:acct_country,:acct_swift,:acct_routing,:acct_remarks,:trans_otp)";
+            $sql = "INSERT INTO temp_trans (amount, trans_id, acct_id, bank_name, acct_name_id, acct_number, acct_type, acct_country, acct_swift, acct_routing, acct_remarks, trans_otp) 
+                    VALUES (:amount, :trans_id, :acct_id, :bank_name, :acct_name, :acct_number, :acct_type, :acct_country, :acct_swift, :acct_routing, :acct_remarks, :trans_otp)";
             $tranfered = $conn->prepare($sql);
             $tranfered->execute([
                 'amount' => $amount,
@@ -58,57 +62,20 @@ if (isset($_POST['wire_transfer'])) {
                 'trans_otp' => $trans_opt
             ]);
 
-            if (true) {
-                $acct_otp = substr(number_format(time() * rand(), 0, '', ''), 0, 6);
+            // Generate OTP and notify user
+            $acct_otp = substr(number_format(time() * rand(), 0, '', ''), 0, 6);
+            $sql = "UPDATE users SET acct_otp = :acct_otp WHERE id = :id";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute(['acct_otp' => $acct_otp, 'id' => $account_id]);
 
-                $sql =  "UPDATE users SET acct_otp=:acct_otp WHERE id=:id";
-                $stmt = $conn->prepare($sql);
-                $stmt->execute([
-                    'acct_otp' => $acct_otp,
-                    'id' => $account_id
-                ]);
-
-                if (true) {
-                    if ($row['billing_code'] === '0') {
-
-                        $sql = "SELECT * FROM users WHERE id=:id";
-                        $stmt = $conn->prepare($sql);
-                        $stmt->execute([
-                            'id' => $account_id
-                        ]);
-                        $resultCode = $stmt->fetch(PDO::FETCH_ASSOC);
-                        $code = $resultCode['acct_otp'];
-
-                        $APP_NAME = $pageTitle;
-
-                        $number = $resultCode['acct_phone'];
-
-
-
-                        $messageText = "Dear " . $resultCode['firstname'] . " You just made a Transaction of " . $currency . "" . $amount . " in Your " . $APP_NAME . " Account  Kindly make use of this " . $code . "  to complete your Transaction Thanks ";
-
-                        // $sendSms->sendSmsCode($number,$messageText);
-
-                        $message = $sendMail->pinRequest($currency, $amount, $fullName, $code, $APP_NAME);
-                        $subject = "[OTP CODE] - $APP_NAME";
-
-                        $email_message->send_mail($email, $message, $subject);
-
-                        if (true) {
-                            session_start();
-                            $_SESSION['wire-transfer'] = $code;
-                            header("Location:./pin.php");
-                        }
-                    } else {
-                        session_start();
-                        $_SESSION['wire-transfer'] = $user_id;
-                        header("Location:./cot.php");
-                    }
-                }
-            }
+            // Redirect based on billing code
+            session_start();
+            $_SESSION['wire-transfer'] = ($row['billing_code'] === '0') ? $acct_otp : $user_id;
+            header("Location:" . ($row['billing_code'] === '0' ? "./pin.php" : "./cot.php"));
         }
     }
 }
+
 
 if (isset($_POST['cot_submit'])) {
     $cotCode = $_POST['cot_code'];
