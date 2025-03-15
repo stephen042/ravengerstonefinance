@@ -194,13 +194,13 @@ unset($_SESSION['wire_transfer'], $_SESSION['dom_transfer']);
 
                             <div class="inv-detail">
                                 <div class="info-detail-1">
-                                    <p>Limit</p>
+                                    <p>Transfer Limit</p>
                                     <p><span class="w-currency"><?= $currency ?></span> <span class="bill-amount"><?= $row['acct_limit'] ?></span></p>
                                 </div>
-                                <div class="info-detail-2">
+                                <!-- <div class="info-detail-2">
                                     <p>Transfer Limit Remain</p>
                                     <p class=""><span class="w-currency text-danger"><?= $currency ?></span> <span class="bill-amount text-danger"><?= $limitRemain ?> </span></p>
-                                </div>
+                                </div> -->
                                 
                                 
                                  <?php

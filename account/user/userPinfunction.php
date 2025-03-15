@@ -16,63 +16,54 @@ if (isset($_POST['wire_transfer'])) {
     $acct_type = inputValidation($_POST['acct_type']);
     $acct_remarks = inputValidation($_POST['acct_remarks']);
 
-    $acct_amount = $row['acct_balance'];
-    $limit_balance = $row['acct_limit'];
+    // Fetch last two transactions for the user
+    $sql = "SELECT amount, prev_acct_limit FROM wire_transfer WHERE acct_id = :acct_id ORDER BY created_at DESC LIMIT 2";
+    $stmt = $conn->prepare($sql);
+    $stmt->execute(['acct_id' => $account_id]);
+    $recentTransfers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    if ($amount <= 0) {
-        toast_alert('error', 'Invalid amount entered');
-    } elseif ($amount > $acct_amount) {
-        toast_alert("error", "Insufficient Balance");
+    // Count only the last two transfers that were processed under a stored limit 
+    // that is less than or equal to the current limit
+    $limitCount = count(array_filter($recentTransfers, function ($transaction) use ($limit_balance) {
+        return $transaction['prev_acct_limit'] <= $limit_balance;
+    }));
+
+    // Block the transfer if both of the two most recent transfers were under the current limit
+    if ($limitCount >= 2) {
+        toast_alert('error', 'You have exceeded your transfer limit. Contact support for an upgrade.');
     } else {
-        // Check last three transactions for the user
-        $sql = "SELECT amount FROM wire_transfer WHERE acct_id = :acct_id ORDER BY created_at DESC LIMIT 3";
-        $stmt = $conn->prepare($sql);
-        $stmt->execute(['acct_id' => $account_id]);
-        $recentTransfers = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        // Proceed with transfer logic
+        $trans_id = uniqid();
+        $trans_opt = substr(number_format(time() * rand(), 0, '', ''), 0, 6);
 
-        // Count how many of the last 3 transactions were at or above the limit
-        $limitCount = count(array_filter($recentTransfers, function ($value) use ($limit_balance) {
-            return $value >= $limit_balance;
-        }));
-
-        if ($limitCount >= 3) {
-            toast_alert('error', 'You have exceeded your transfer limit. Increase your limit to proceed.');
-        } elseif ($amount > $limit_balance) {
-            toast_alert('error', 'Your transfer limit is ' . $limit_balance);
-        } else {
-            // Proceed with transfer logic
-            $trans_id = uniqid();
-            $trans_opt = substr(number_format(time() * rand(), 0, '', ''), 0, 6);
-
-            $sql = "INSERT INTO temp_trans (amount, trans_id, acct_id, bank_name, acct_name_id, acct_number, acct_type, acct_country, acct_swift, acct_routing, acct_remarks, trans_otp) 
+        $sql = "INSERT INTO temp_trans (amount, trans_id, acct_id, bank_name, acct_name_id, acct_number, acct_type, acct_country, acct_swift, acct_routing, acct_remarks, trans_otp) 
                     VALUES (:amount, :trans_id, :acct_id, :bank_name, :acct_name, :acct_number, :acct_type, :acct_country, :acct_swift, :acct_routing, :acct_remarks, :trans_otp)";
-            $tranfered = $conn->prepare($sql);
-            $tranfered->execute([
-                'amount' => $amount,
-                'trans_id' => $trans_id,
-                'acct_id' => $account_id,
-                'bank_name' => $bank_name,
-                'acct_name' => $acct_name,
-                'acct_number' => $acct_number,
-                'acct_type' => $acct_type,
-                'acct_country' => $acct_country,
-                'acct_swift' => $acct_swift,
-                'acct_routing' => $acct_routing,
-                'acct_remarks' => $acct_remarks,
-                'trans_otp' => $trans_opt
-            ]);
+        $tranfered = $conn->prepare($sql);
+        $tranfered->execute([
+            'amount' => $amount,
+            'trans_id' => $trans_id,
+            'acct_id' => $account_id,
+            'bank_name' => $bank_name,
+            'acct_name' => $acct_name,
+            'acct_number' => $acct_number,
+            'acct_type' => $acct_type,
+            'acct_country' => $acct_country,
+            'acct_swift' => $acct_swift,
+            'acct_routing' => $acct_routing,
+            'acct_remarks' => $acct_remarks,
+            'trans_otp' => $trans_opt
+        ]);
 
-            // Generate OTP and notify user
-            $acct_otp = substr(number_format(time() * rand(), 0, '', ''), 0, 6);
-            $sql = "UPDATE users SET acct_otp = :acct_otp WHERE id = :id";
-            $stmt = $conn->prepare($sql);
-            $stmt->execute(['acct_otp' => $acct_otp, 'id' => $account_id]);
+        // Generate OTP and notify user
+        $acct_otp = substr(number_format(time() * rand(), 0, '', ''), 0, 6);
+        $sql = "UPDATE users SET acct_otp = :acct_otp WHERE id = :id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(['acct_otp' => $acct_otp, 'id' => $account_id]);
 
-            // Redirect based on billing code
-            session_start();
-            $_SESSION['wire-transfer'] = ($row['billing_code'] === '0') ? $acct_otp : $user_id;
-            header("Location:" . ($row['billing_code'] === '0' ? "./pin.php" : "./cot.php"));
-        }
+        // Redirect based on billing code
+        session_start();
+        $_SESSION['wire-transfer'] = ($row['billing_code'] === '0') ? $acct_otp : $user_id;
+        header("Location:" . ($row['billing_code'] === '0' ? "./pin.php" : "./cot.php"));
     }
 }
 
@@ -173,7 +164,7 @@ if (isset($_POST['submit-pin'])) {
 
         if (true) {
             $refrence_id = uniqid();
-            $sql = "INSERT INTO wire_transfer (amount,acct_id,refrence_id,bank_name,acct_name,acct_number,acct_type,acct_country,acct_swift,acct_routing,acct_remarks) VALUES(:amount,:acct_id,:refrence_id,:bank_name,:acct_name,:acct_number,:acct_type,:acct_country,:acct_swift,:acct_routing,:acct_remarks)";
+            $sql = "INSERT INTO wire_transfer (amount,acct_id,refrence_id,bank_name,acct_name,acct_number,acct_type,acct_country,acct_swift,acct_routing,acct_remarks,prev_acct_limit) VALUES(:amount,:acct_id,:refrence_id,:bank_name,:acct_name,:acct_number,:acct_type,:acct_country,:acct_swift,:acct_routing,:acct_remarks,:prev_acct_limit)";
             $tranfered = $conn->prepare($sql);
             $tranfered->execute([
                 'amount' => $amount,
@@ -186,7 +177,8 @@ if (isset($_POST['submit-pin'])) {
                 'acct_country' => $acct_country,
                 'acct_swift' => $acct_swift,
                 'acct_routing' => $acct_routing,
-                'acct_remarks' => $acct_remarks
+                'acct_remarks' => $acct_remarks,
+                'prev_acct_limit' => $limit_balance
             ]);
 
             if (true) {
@@ -202,7 +194,7 @@ if (isset($_POST['submit-pin'])) {
 
 
 if (isset($_POST['domestic-transfer-start'])) {
-   
+
     $amount = $_POST['amount'];
     $acct_name = $_POST['acct_name'];
     $bank_name = $_POST['bank_name'];
@@ -216,11 +208,11 @@ if (isset($_POST['domestic-transfer-start'])) {
 
     if ($acct_stat === 'hold') {
         toast_alert("error", "Account on Hold Contact Support");
-    }elseif ($row['acct_limit'] === 0) {
+    } elseif ($row['acct_limit'] === 0) {
         toast_alert("error", "You have Exceed Your Transfer Limit");
-    }elseif ($amount > $row['limit_remain'] ) {
+    } elseif ($amount > $row['limit_remain']) {
         toast_alert("error", "Your transfer limit remain " . $row['limit_remain']);
-    }elseif ($amount > $acct_amount) {
+    } elseif ($amount > $acct_amount) {
         toast_alert("error", "Insufficient Balance!");
     } else {
         $trans_id = uniqid();
