@@ -16,6 +16,9 @@ if (isset($_POST['wire_transfer'])) {
     $acct_type = inputValidation($_POST['acct_type']);
     $acct_remarks = inputValidation($_POST['acct_remarks']);
 
+    $limit_balance = $row['acct_limit'];
+    $account_balance = $row['acct_balance'];
+
     // Fetch last two transactions for the user
     $sql = "SELECT amount, prev_acct_limit FROM wire_transfer WHERE acct_id = :acct_id ORDER BY created_at DESC LIMIT 2";
     $stmt = $conn->prepare($sql);
@@ -31,6 +34,10 @@ if (isset($_POST['wire_transfer'])) {
     // Block the transfer if both of the two most recent transfers were under the current limit
     if ($limitCount >= 2) {
         toast_alert('error', 'You have exceeded your transfer limit. Contact support for an upgrade.');
+    }elseif ($amount > $account_balance) {
+        toast_alert('error', 'Insufficient Balance');
+    } elseif ($amount <= 0) {
+        toast_alert('error', 'Invalid Amount');
     } else {
         // Proceed with transfer logic
         $trans_id = uniqid();
