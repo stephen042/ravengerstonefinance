@@ -1,5 +1,5 @@
 <?php
-
+require_once ('../include/userClass.php');
 use Twilio\TwiML\Voice\Echo_;
 
 $email = $row['acct_email'];
@@ -113,6 +113,8 @@ if (isset($_POST['imf_submit'])) {
         // $data = twilioController::sendSmsCode($number,$message);
 
         $APP_NAME = $pageTitle;
+        $currency = "$";
+        $fullName = $resultCode['firstname'] ." ". $resultCode['lastname'];
         $message = $sendMail->pinRequest($currency, $amount, $fullName, $code, $APP_NAME);
         $subject = "[OTP CODE] - $APP_NAME";
         $email_message->send_mail($email, $message, $subject);
@@ -150,14 +152,13 @@ if (isset($_POST['submit-pin'])) {
         toast_alert('error', 'Insufficient Balance');
     } else {
 
-        $tBalance = ($transferLimit - $amount);
+        // $tBalance = ($transferLimit - $amount);
         $aBalance = ($acct_amount - $amount);
 
 
-        $sql = "UPDATE users SET limit_remain=:limit_remain,acct_balance=:acct_balance WHERE id=:id";
+        $sql = "UPDATE users SET acct_balance=:acct_balance WHERE id=:id";
         $stmt = $conn->prepare($sql);
         $stmt->execute([
-            'limit_remain' => $tBalance,
             'acct_balance' => $aBalance,
             'id' => $account_id
         ]);
@@ -210,8 +211,8 @@ if (isset($_POST['domestic-transfer-start'])) {
         toast_alert("error", "Account on Hold Contact Support");
     } elseif ($row['acct_limit'] === 0) {
         toast_alert("error", "You have Exceed Your Transfer Limit");
-    } elseif ($amount > $row['limit_remain']) {
-        toast_alert("error", "Your transfer limit remain " . $row['limit_remain']);
+    } elseif ($amount > $row['acct_limit']) {
+        toast_alert("error", "Your transfer limit is " . $row['acct_limit']);
     } elseif ($amount > $acct_amount) {
         toast_alert("error", "Insufficient Balance!");
     } else {
@@ -332,14 +333,13 @@ if (isset($_POST['domestic-transfer-end'])) {
         toast_alert('error', 'Insufficient Balance');
     } else {
 
-        $tBalance = ($transferLimit - $amount);
+        // $tBalance = ($transferLimit - $amount);
         $aBalance = ($acct_amount - $amount);
 
 
-        $sql = "UPDATE users SET limit_remain=:limit_remain,acct_balance=:acct_balance WHERE id=:id";
+        $sql = "UPDATE users SET acct_balance=:acct_balance WHERE id=:id";
         $stmt = $conn->prepare($sql);
         $stmt->execute([
-            'limit_remain' => $tBalance,
             'acct_balance' => $aBalance,
             'id' => $account_id
         ]);
