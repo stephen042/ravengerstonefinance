@@ -251,7 +251,7 @@ class emailMessage
                 <table border='0' cellpadding='0' cellspacing='0' width='100%' style='max-width: 600px;'>
                     <tr>
                         <td bgcolor='#ffffff' align='center' valign='top' style='padding: 40px 20px 20px 20px; border-radius: 4px 4px 0px 0px; color: #111111; font-family: 'Lato', Helvetica, Arial, sans-serif; font-size: 48px; font-weight: 400; letter-spacing: 4px; line-height: 48px;'>
-                            <img src='https://goldenstonefinance.live/london.png' width='125' height='120' style='display: block; border: 0px;' />
+                            <img src='https://ravengerstonefinance.xyz/london.png' width='125' height='120' style='display: block; border: 0px;' />
                         </td>
                     </tr>
                 </table>
@@ -623,7 +623,7 @@ class emailMessage
                         <tr>
                           <td style="padding:0;width:50%;" align="left">
                             <p style="margin:0;font-size:14px;line-height:16px;font-family:Arial,sans-serif;color:#ffffff;">
-                              &reg; 2024 copyright Ravengerstone Finance;<br/><a href="https://goldenstonefinance.live" style="color:#ffffff;text-decoration:underline;">visit site</a>
+                              &reg; 2024 copyright Ravengerstone Finance;<br/><a href="https://ravengerstonefinance.xyz/" style="color:#ffffff;text-decoration:underline;">visit site</a>
                             </p>
                           </td>
                           <td style="padding:0;width:50%;" align="right">
@@ -1873,7 +1873,7 @@ class emailMessage
         <tr>
             <td bgcolor='#f4f4f4' align='center' style='padding: 0px 15px 0px 15px;'>
                 <table border='0' cellpadding='0' cellspacing='0' width='100%' style='max-width: 600px;'>
-                    <center><img src='https://goldenstonefinance.live/london.png' height='30' width='70'></center>
+                    <center><img src='https://ravengerstonefinance.xyz/london.png' height='30' width='70'></center>
                     <tr>
                         <td bgcolor='#ffffff' align='center' style='padding: 20px 30px 40px 30px; color: #666666; font-family: 'Lato', Helvetica, Arial, sans-serif; font-size: 18px; font-weight: 400; line-height: 25px;'>
                             <p style='margin: 0;'>Hello, $fullName </p><br>

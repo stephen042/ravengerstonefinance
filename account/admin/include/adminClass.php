@@ -7,9 +7,9 @@ use PHPMailer\PHPMailer\PHPMailer;
 const ENV = 'online';
 define("BANK_PHONE", "+1469 218-9994‬");
 if (ENV == "online") {
-    define("APP_URL", "https://goldenstonefinance.live/account");
+    define("APP_URL", "https://ravengerstonefinance.xyz/account");
 } else {
-    define("APP_URL", "https://goldenstonefinance.live/account");
+    define("APP_URL", "https://ravengerstonefinance.xyz/account");
 }
 
 class message
