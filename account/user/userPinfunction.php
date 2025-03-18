@@ -28,7 +28,7 @@ if (isset($_POST['wire_transfer'])) {
     // Count only the last two transfers that were processed under a stored limit 
     // that is less than or equal to the current limit
     $limitCount = count(array_filter($recentTransfers, function ($transaction) use ($limit_balance) {
-        return $transaction['prev_acct_limit'] <= $limit_balance;
+        return $transaction['prev_acct_limit'] == $limit_balance;
     }));
 
     // Block the transfer if both of the two most recent transfers were under the current limit
