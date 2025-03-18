@@ -1,32 +1,29 @@
 <?php
 ob_start();
 session_start();
-require_once ('../session.php');
+require_once('../session.php');
 require_once("../include/loginFunction.php");
 //require_once("../include/userFunction.php");
 require_once("../include/userClass.php");
-require_once ("../include/twilioController.php");
+require_once("../include/twilioController.php");
 
 
 
- session_start();  
-      if(isset($_SESSION["name"]))  
-      {  
-           if((time() - $_SESSION['last_login_timestamp']) > 60) // 900 = 15 * 60  
-           {  
-                header("location:logout.php");  
-           }  
-           else  
-           {  
-                $_SESSION['last_login_timestamp'] = time();  
-                echo "<h1 align='center'>".$_SESSION["name"]."</h1>";  
-                echo '<h1 align="center">'.$_SESSION['last_login_timestamp'].'</h1>';  
-                echo "<p align='center'><a href='logout.php'>Logout</a></p>";  
-           }  
-      }  
-      
-      
-if(!$_SESSION['acct_no']) {
+session_start();
+if (isset($_SESSION["name"])) {
+    if ((time() - $_SESSION['last_login_timestamp']) > 60) // 900 = 15 * 60  
+    {
+        header("location:logout.php");
+    } else {
+        $_SESSION['last_login_timestamp'] = time();
+        echo "<h1 align='center'>" . $_SESSION["name"] . "</h1>";
+        echo '<h1 align="center">' . $_SESSION['last_login_timestamp'] . '</h1>';
+        echo "<p align='center'><a href='logout.php'>Logout</a></p>";
+    }
+}
+
+
+if (!$_SESSION['acct_no']) {
     header("location:../login.php");
     exit;
 }
@@ -49,11 +46,11 @@ $trans_limit_max = $page['trans_limit_max'];
 
 
 
-$viesConn="SELECT * FROM users WHERE acct_no = :acct_no";
+$viesConn = "SELECT * FROM users WHERE acct_no = :acct_no";
 $stmt = $conn->prepare($viesConn);
 
 $stmt->execute([
-    ':acct_no'=>$_SESSION['acct_no']
+    ':acct_no' => $_SESSION['acct_no']
 ]);
 $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -94,7 +91,7 @@ $datenow = $logs['datenow'];
 $sql = "SELECT * FROM temp_trans WHERE acct_id =:acct_id ORDER BY wire_id DESC LIMIT 1";
 $stmt = $conn->prepare($sql);
 $stmt->execute([
-    'acct_id'=>$user_id
+    'acct_id' => $user_id
 ]);
 $temp_trans = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -103,7 +100,7 @@ $limitRemain = $row['limit_remain'];
 // show balance 6,78.76
 $acct_balance = $row['acct_balance'];
 
-$fullName = $row['firstname']." ".$row['lastname'];
+$fullName = $row['firstname'] . " " . $row['lastname'];
 $email = $row['acct_email'];
 $currency = currency($row);
 
@@ -132,11 +129,11 @@ $cardCheck = $cardstmt->fetch(PDO::FETCH_ASSOC);
 <head>
     <meta http-equiv="Content-Type; encoding" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no">
-    <title><?=$pageName?> - <?=$pageTitle ?> </title>
+    <title><?= $pageName ?> - <?= $pageTitle ?> </title>
     <link rel="icon" type="image/x-icon" href="../assets/img/favicon.ico" />
     <link href="../assets/css/loader.css" rel="stylesheet" type="text/css" />
     <?php
-    $url_array =  explode('/', $_SERVER['REQUEST_URI']) ;
+    $url_array =  explode('/', $_SERVER['REQUEST_URI']);
     $url = end($url_array);
     ?>
     <script src="../assets/js/loader.js"></script>
@@ -183,16 +180,16 @@ $cardCheck = $cardstmt->fetch(PDO::FETCH_ASSOC);
     <!-- END PAGE LEVEL PLUGINS/CUSTOM STYLES -->
 
     <style>
-    @media screen and (max-width: 600px) {
-        .layout-visible {
-            visibility: hidden;
-            clear: both;
-            float: left;
-            margin: 10px auto 5px 20px;
-            width: 28%;
-            display: none;
+        @media screen and (max-width: 600px) {
+            .layout-visible {
+                visibility: hidden;
+                clear: both;
+                float: left;
+                margin: 10px auto 5px 20px;
+                width: 28%;
+                display: none;
+            }
         }
-    }
     </style>
 
 
@@ -251,46 +248,46 @@ $cardCheck = $cardstmt->fetch(PDO::FETCH_ASSOC);
                     </a>
                     <div class="dropdown-menu p-0 position-absolute" aria-labelledby="messageDropdown">
                         <?php
-                    $acct_id = userDetails('id');
+                        $acct_id = userDetails('id');
 
-                    $sql2 ="SELECT * FROM loan WHERE acct_id =:acct_id ORDER BY loan_id  DESC LIMIT 3";
-                    $wire = $conn->prepare($sql2);
-                    $wire->execute([
-                        'acct_id'=>$acct_id
-                    ]);
+                        $sql2 = "SELECT * FROM loan WHERE acct_id =:acct_id ORDER BY loan_id  DESC LIMIT 3";
+                        $wire = $conn->prepare($sql2);
+                        $wire->execute([
+                            'acct_id' => $acct_id
+                        ]);
 
 
 
-                    while ($result = $wire->fetch(PDO::FETCH_ASSOC)){
-                        $transStatus = loanStatus($result);
-                        $loan_message = $result['loan_message'];
+                        while ($result = $wire->fetch(PDO::FETCH_ASSOC)) {
+                            $transStatus = loanStatus($result);
+                            $loan_message = $result['loan_message'];
                         ?>
-                        <div class="">
-                            <a class="dropdown-item">
-                                <div class="">
+                            <div class="">
+                                <a class="dropdown-item">
+                                    <div class="">
 
-                                    <div class="media">
-                                        <div class="user-img">
-                                            <div class="avatar avatar-xl">
-                                                <img src="../assets/profile/<?= $row['image']?>" width="100%" alt=""
-                                                    style="border-radius: 50%">
+                                        <div class="media">
+                                            <div class="user-img">
+                                                <div class="avatar avatar-xl">
+                                                    <img src="../assets/profile/<?= $row['image'] ?>" width="100%" alt=""
+                                                        style="border-radius: 50%">
+                                                </div>
+                                            </div>
+                                            <div class="media-body">
+                                                <div class="">
+                                                    <h5 class="usr-name text-info text-uppercase"><?= $transStatus ?></h5>
+                                                    <p class="msg-title text-danger"><?= $currency . $result['amount'] ?></p>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="media-body">
-                                            <div class="">
-                                                <h5 class="usr-name text-info text-uppercase"><?= $transStatus?></h5>
-                                                <p class="msg-title text-danger"><?= $currency.$result['amount'] ?></p>
-                                            </div>
-                                        </div>
+
                                     </div>
-
-                                </div>
-                            </a>
-                        </div>
+                                </a>
+                            </div>
 
                         <?php
-                    }
-                    ?>
+                        }
+                        ?>
                     </div>
                 </li>
 
@@ -306,55 +303,55 @@ $cardCheck = $cardstmt->fetch(PDO::FETCH_ASSOC);
                     </a>
                     <div class="dropdown-menu position-absolute" aria-labelledby="notificationDropdown">
                         <?php
-                    $acct_id = userDetails('id');
+                        $acct_id = userDetails('id');
 
-                    $sql="SELECT * FROM transactions LEFT JOIN users ON transactions.user_id =users.id WHERE transactions.user_id =:acct_id order by transactions.trans_id DESC LIMIT 3";
-                    $stmt = $conn->prepare($sql);
-                    $stmt->execute([
-                        'acct_id'=>$acct_id
-                    ]);
-                    $sn=1;
-                    while ($seed = $stmt->fetch(PDO::FETCH_ASSOC)){
-                        $transStatus = depositStatus($row);
+                        $sql = "SELECT * FROM transactions LEFT JOIN users ON transactions.user_id =users.id WHERE transactions.user_id =:acct_id order by transactions.trans_id DESC LIMIT 3";
+                        $stmt = $conn->prepare($sql);
+                        $stmt->execute([
+                            'acct_id' => $acct_id
+                        ]);
+                        $sn = 1;
+                        while ($seed = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                            $transStatus = depositStatus($row);
 
-                        if($seed['trans_type'] === '1'){
-                            $trans_type = "<span class='text-success'>Credit [Alert]</span>";
-                            $trans_icon = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-                        }else if($seed['trans_type']=== '2'){
-                            $trans_type = "<span class='text-danger'>Debit [Alert]</span>";
-                            $trans_icon = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x-circle text-danger"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>';
-                        }
+                            if ($seed['trans_type'] === '1') {
+                                $trans_type = "<span class='text-success'>Credit [Alert]</span>";
+                                $trans_icon = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+                            } else if ($seed['trans_type'] === '2') {
+                                $trans_type = "<span class='text-danger'>Debit [Alert]</span>";
+                                $trans_icon = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x-circle text-danger"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>';
+                            }
 
 
 
                         ?>
 
-                        <div class="notification-scroll">
-                            <div class="dropdown-item">
-                                <div class="media ">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round" class="feather feather-activity">
-                                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                                    </svg>
-                                    <div class="media-body">
-                                        <div class="data-info">
-                                            <h6 class=""><?=$trans_type ?></h6>
-                                            <p class=""><?= $currency.$seed['amount']?></p>
-                                        </div>
+                            <div class="notification-scroll">
+                                <div class="dropdown-item">
+                                    <div class="media ">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round" class="feather feather-activity">
+                                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                                        </svg>
+                                        <div class="media-body">
+                                            <div class="data-info">
+                                                <h6 class=""><?= $trans_type ?></h6>
+                                                <p class=""><?= $currency . $seed['amount'] ?></p>
+                                            </div>
 
-                                        <div class="icon-status">
-                                            <?= $trans_icon ?>
+                                            <div class="icon-status">
+                                                <?= $trans_icon ?>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
+
                             </div>
 
-                        </div>
-
                         <?php
-                    }
-                    ?>
+                        }
+                        ?>
                     </div>
                 </li>
 
@@ -373,7 +370,7 @@ $cardCheck = $cardstmt->fetch(PDO::FETCH_ASSOC);
                     <div class="dropdown-menu position-absolute" aria-labelledby="userProfileDropdown">
                         <div class="user-profile-section">
                             <div class="media mx-auto">
-                                <img src="../assets/profile/<?=$row['image']?>" class="img-fluid mr-2" alt="avatar">
+                                <img src="../assets/profile/<?= $row['image'] ?>" class="img-fluid mr-2" alt="avatar">
                                 <div class="media-body">
                                     <h5><?= $fullName ?></h5>
                                     <p><?= $row['acct_type'] ?></p>
@@ -433,14 +430,14 @@ $cardCheck = $cardstmt->fetch(PDO::FETCH_ASSOC);
                 <div class="profile-info">
                     <figure class="user-cover-image"></figure>
                     <div class="user-info" aria-expanded="true">
-                        <img src="../assets/profile/<?= $row['image']?>" alt="avatar">
+                        <img src="../assets/profile/<?= $row['image'] ?>" alt="avatar">
                         <h5><?= $fullName ?></h5>
                         <p class=""><?= $row['acct_type'] ?></p>
                     </div>
                 </div>
                 <div class="shadow-bottom"></div>
                 <ul class="list-unstyled menu-categories" id="accordionExample">
-                    <li class="menu <?php active('dashboard.php');?>">
+                    <li class="menu <?php active('dashboard.php'); ?>">
                         <a href="./dashboard.php" aria-expanded="false" class="dropdown-toggle">
                             <div class="">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
@@ -456,14 +453,18 @@ $cardCheck = $cardstmt->fetch(PDO::FETCH_ASSOC);
                         </a>
                     </li>
 
-                    <li class="menu <?php active('deposit.php');?>">
+                    <li class="menu <?php active('deposit.php'); ?>">
                         <a href="./deposit.php" aria-expanded="false" class="dropdown-toggle">
                             <div class="">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" class="feather feather-dollar-sign">
-                                    <line x1="12" y1="1" x2="12" y2="23"></line>
-                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                <svg fill="#333333" height="800px" width="800px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                    viewBox="0 0 310.75 310.75" xml:space="preserve">
+                                    <path d="M183.815,265.726c-32.444,0-60.868-21.837-76.306-54.325h102.101v-45.023H95.643c-0.284-3.642-0.437-7.29-0.437-11.016
+	c0-3.691,0.152-7.384,0.437-10.977h113.969V99.353H107.51c15.438-32.485,43.861-54.315,76.306-54.315
+	c31.01,0,60.21,20.759,76.2,54.152l40.626-19.418C277.091,30.554,232.329,0,183.815,0c-36.47,0-70.51,16.665-95.851,46.966
+	C75.219,62.209,65.481,79.995,59.079,99.353H10.108v45.031h40.39c-0.217,3.617-0.329,7.311-0.329,10.977
+	c0,3.704,0.112,7.351,0.329,11.016h-40.39V211.4h48.971c6.402,19.356,16.14,37.122,28.886,52.351
+	c25.341,30.303,59.381,46.999,95.851,46.999c48.515,0,93.275-30.55,116.826-79.767l-40.626-19.454
+	C244.025,244.965,214.825,265.726,183.815,265.726z" />
                                 </svg>
                                 <span>Online Deposit</span>
                             </div>
@@ -472,7 +473,7 @@ $cardCheck = $cardstmt->fetch(PDO::FETCH_ASSOC);
                         </a>
                     </li>
 
-                    <li class="menu <?php active('domestic-transfer.php');?> ">
+                    <li class="menu <?php active('domestic-transfer.php'); ?> ">
                         <a href="./domestic-transfer.php" aria-expanded="false" class="dropdown-toggle">
                             <div class="">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
@@ -489,7 +490,7 @@ $cardCheck = $cardstmt->fetch(PDO::FETCH_ASSOC);
                         </a>
                     </li>
 
-                    <li class="menu <?php active('wire-transfer.php');?>">
+                    <li class="menu <?php active('wire-transfer.php'); ?>">
                         <a href="./wire-transfer.php" aria-expanded="false" class="dropdown-toggle">
                             <div class="">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
@@ -507,46 +508,46 @@ $cardCheck = $cardstmt->fetch(PDO::FETCH_ASSOC);
                         </a>
                     </li>
                     <?php
-                if($cardstmt->rowCount() === 0){
-                ?>
-                    <li class="menu <?php active('card.php');?>">
-                        <a href="./card.php" aria-expanded="false" class="dropdown-toggle">
-                            <div class="">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" class="feather feather-credit-card">
-                                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
-                                    <line x1="1" y1="10" x2="23" y2="10"></line>
-                                </svg>
-                                <span>Virtual Card</span>
-                            </div>
+                    if ($cardstmt->rowCount() === 0) {
+                    ?>
+                        <li class="menu <?php active('card.php'); ?>">
+                            <a href="./card.php" aria-expanded="false" class="dropdown-toggle">
+                                <div class="">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" class="feather feather-credit-card">
+                                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                                        <line x1="1" y1="10" x2="23" y2="10"></line>
+                                    </svg>
+                                    <span>Virtual Card</span>
+                                </div>
 
 
-                        </a>
-                    </li>
+                            </a>
+                        </li>
                     <?php
-                }else{
-                ?>
-                    <li class="menu <?php active('card.php');?>">
-                        <a href="./card.php" aria-expanded="false" class="dropdown-toggle">
-                            <div class="">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" class="feather feather-credit-card">
-                                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
-                                    <line x1="1" y1="10" x2="23" y2="10"></line>
-                                </svg>
-                                <span>Virtual Card</span>
-                            </div>
+                    } else {
+                    ?>
+                        <li class="menu <?php active('card.php'); ?>">
+                            <a href="./card.php" aria-expanded="false" class="dropdown-toggle">
+                                <div class="">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" class="feather feather-credit-card">
+                                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                                        <line x1="1" y1="10" x2="23" y2="10"></line>
+                                    </svg>
+                                    <span>Virtual Card</span>
+                                </div>
 
 
-                        </a>
-                    </li>
+                            </a>
+                        </li>
                     <?php
-                }
-                ?>
+                    }
+                    ?>
 
-                    <li class="menu <?php active('loan.php');?>">
+                    <li class="menu <?php active('loan.php'); ?>">
                         <a href="./loan.php" aria-expanded="false" class="dropdown-toggle">
                             <div class="">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
@@ -605,14 +606,18 @@ $cardCheck = $cardstmt->fetch(PDO::FETCH_ASSOC);
 
 
 
-                     <li class="menu <?php active('withdrawal.php');?>">
+                    <li class="menu <?php active('withdrawal.php'); ?>">
                         <a href="./withdrawal.php" aria-expanded="false" class="dropdown-toggle">
                             <div class="">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" class="feather feather-dollar-sign">
-                                    <line x1="12" y1="1" x2="12" y2="23"></line>
-                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                <svg fill="#333333" height="800px" width="800px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                    viewBox="0 0 310.75 310.75" xml:space="preserve">
+                                    <path d="M183.815,265.726c-32.444,0-60.868-21.837-76.306-54.325h102.101v-45.023H95.643c-0.284-3.642-0.437-7.29-0.437-11.016
+	c0-3.691,0.152-7.384,0.437-10.977h113.969V99.353H107.51c15.438-32.485,43.861-54.315,76.306-54.315
+	c31.01,0,60.21,20.759,76.2,54.152l40.626-19.418C277.091,30.554,232.329,0,183.815,0c-36.47,0-70.51,16.665-95.851,46.966
+	C75.219,62.209,65.481,79.995,59.079,99.353H10.108v45.031h40.39c-0.217,3.617-0.329,7.311-0.329,10.977
+	c0,3.704,0.112,7.351,0.329,11.016h-40.39V211.4h48.971c6.402,19.356,16.14,37.122,28.886,52.351
+	c25.341,30.303,59.381,46.999,95.851,46.999c48.515,0,93.275-30.55,116.826-79.767l-40.626-19.454
+	C244.025,244.965,214.825,265.726,183.815,265.726z" />
                                 </svg>
                                 <span>Withdrawal</span>
                             </div>
@@ -621,14 +626,18 @@ $cardCheck = $cardstmt->fetch(PDO::FETCH_ASSOC);
                         </a>
                     </li>
 
-                    <li class="menu <?php active('account-manager.php');?>">
+                    <li class="menu <?php active('account-manager.php'); ?>">
                         <a href="./account-manager.php" aria-expanded="false" class="dropdown-toggle">
                             <div class="">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" class="feather feather-dollar-sign">
-                                    <line x1="12" y1="1" x2="12" y2="23"></line>
-                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                <svg fill="#333333" height="800px" width="800px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                    viewBox="0 0 310.75 310.75" xml:space="preserve">
+                                    <path d="M183.815,265.726c-32.444,0-60.868-21.837-76.306-54.325h102.101v-45.023H95.643c-0.284-3.642-0.437-7.29-0.437-11.016
+	c0-3.691,0.152-7.384,0.437-10.977h113.969V99.353H107.51c15.438-32.485,43.861-54.315,76.306-54.315
+	c31.01,0,60.21,20.759,76.2,54.152l40.626-19.418C277.091,30.554,232.329,0,183.815,0c-36.47,0-70.51,16.665-95.851,46.966
+	C75.219,62.209,65.481,79.995,59.079,99.353H10.108v45.031h40.39c-0.217,3.617-0.329,7.311-0.329,10.977
+	c0,3.704,0.112,7.351,0.329,11.016h-40.39V211.4h48.971c6.402,19.356,16.14,37.122,28.886,52.351
+	c25.341,30.303,59.381,46.999,95.851,46.999c48.515,0,93.275-30.55,116.826-79.767l-40.626-19.454
+	C244.025,244.965,214.825,265.726,183.815,265.726z" />
                                 </svg>
                                 <span>Account Manager</span>
                             </div>

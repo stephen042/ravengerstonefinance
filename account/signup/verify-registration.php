@@ -6,7 +6,7 @@ if (isset($_POST['regSubmit'])) {
 
     $acct_no = "9909" . (substr(number_format(time() * rand(), 0, '', ''), 0, 6));
     $acct_type = "Savings";
-    $acct_currency = "USD";
+    $acct_currency = "EUR";
     $firstname = $_POST['firstname'];
     $lastname = $_POST['lastname'];
     $acct_occupation = $_POST['occupation'];

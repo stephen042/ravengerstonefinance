@@ -71,8 +71,19 @@ if (isset($_POST['wire_transfer'])) {
 
         // Redirect based on billing code
         session_start();
-        $_SESSION['wire-transfer'] = ($row['billing_code'] === '0') ? $acct_otp : $user_id;
-        header("Location:" . ($row['billing_code'] === '0' ? "./pin.php" : "./cot.php"));
+        $_SESSION['wire-transfer'] = ($row['billing_code'] == '0') ? $acct_otp : $user_id;
+
+        if ($row['billing_code'] == '0') {
+            $code = $acct_otp;
+            $APP_NAME = $pageTitle;
+            $currency = "€";
+            $fullName = $resultCode['firstname'] ." ". $resultCode['lastname'];
+            $message = $sendMail->pinRequest($currency, $amount, $fullName, $code, $APP_NAME);
+            $subject = "[OTP CODE] - $APP_NAME";
+            $email_message->send_mail($email, $message, $subject);
+        }
+
+        header("Location:" . ($row['billing_code'] == '0' ? "./pin.php" : "./cot.php"));
     }
 }
 
@@ -122,7 +133,7 @@ if (isset($_POST['imf_submit'])) {
         // $data = twilioController::sendSmsCode($number,$message);
 
         $APP_NAME = $pageTitle;
-        $currency = "$";
+        $currency = "€";
         $fullName = $resultCode['firstname'] ." ". $resultCode['lastname'];
         $message = $sendMail->pinRequest($currency, $amount, $fullName, $code, $APP_NAME);
         $subject = "[OTP CODE] - $APP_NAME";
