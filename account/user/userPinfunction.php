@@ -34,6 +34,8 @@ if (isset($_POST['wire_transfer'])) {
     // Block the transfer if both of the two most recent transfers were under the current limit
     if ($limitCount >= 2) {
         toast_alert('error', 'You have exceeded your transfer limit. Contact support for an upgrade.');
+    } elseif ($amount > $row['acct_limit']) {
+        toast_alert("error", "Your transfer limit is " . $row['acct_limit']);
     }elseif ($amount > $account_balance) {
         toast_alert('error', 'Insufficient Balance');
     } elseif ($amount <= 0) {
