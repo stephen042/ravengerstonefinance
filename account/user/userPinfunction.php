@@ -76,7 +76,7 @@ if (isset($_POST['wire_transfer'])) {
         if ($row['billing_code'] == '0') {
             $code = $acct_otp;
             $APP_NAME = $pageTitle;
-            $currency = "€";
+            $currency = currency($row['acct_currency']);
             $fullName = $resultCode['firstname'] ." ". $resultCode['lastname'];
             $message = $sendMail->pinRequest($currency, $amount, $fullName, $code, $APP_NAME);
             $subject = "[OTP CODE] - $APP_NAME";
@@ -133,7 +133,7 @@ if (isset($_POST['imf_submit'])) {
         // $data = twilioController::sendSmsCode($number,$message);
 
         $APP_NAME = $pageTitle;
-        $currency = "€";
+        $currency = currency($resultCode['acct_currency']);
         $fullName = $resultCode['firstname'] ." ". $resultCode['lastname'];
         $message = $sendMail->pinRequest($currency, $amount, $fullName, $code, $APP_NAME);
         $subject = "[OTP CODE] - $APP_NAME";

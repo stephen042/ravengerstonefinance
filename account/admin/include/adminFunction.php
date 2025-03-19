@@ -118,10 +118,12 @@ function domesticTransaction($result){
 
 
 //USERS CURRENCY
-function currency($row){
-    if($row['acct_currency'] === 'USD'){
+function currency($row) {
+    if ($row['acct_currency'] === 'USD') {
         return "$";
-    }elseif($row['acct_currency'] === 'EUR'){
+    } elseif ($row['acct_currency'] === 'EUR') {
         return "&euro;";
+    } elseif ($row['acct_currency'] === 'GBP') {
+        return "£";
     }
 }
